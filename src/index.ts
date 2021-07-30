@@ -5,8 +5,8 @@ import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import nodeObjectHash from 'node-object-hash';
 import HardSourceWebpackPlugin, { ExcludeModulePlugin } from 'hard-source-webpack-plugin';
 
-import esbLoaderPkg from 'esbuild-loader/package.json';
-import tsPkg from 'typescript/package.json';
+const esbLoaderPkg = require('esbuild-loader/package.json');
+const tsPkg = require('typescript/package.json');
 
 interface IFasterOpts {
   disabled?: boolean;
@@ -61,7 +61,8 @@ function configRuleJs(jsRule: Config.Rule<Config.Module>, api: PluginAPI, target
 }
 
 function configureMinimizer (config: Config, target: string | string[]) {
-  const minimizers = (config.optimization as any /** 忽略ts警告 */).minimizers as any;
+   /** 忽略ts警告 */
+  const minimizers = (config.optimization as any).minimizers as any;
 
   if (minimizers) {
     minimizers.delete('terser');
