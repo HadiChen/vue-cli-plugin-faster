@@ -1,0 +1,57 @@
+{
+  "name": "vue-cli-plugin-faster",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HadiChen/vue-cli-plugin-faster.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "publish": "npm run build && clean-publish",
+    "prerelease": "npm run lint && npm run build",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "keywords": [
+    "vue",
+    "cli",
+    "esbuild",
+    "hard-source-webpack-plugin"
+  ],
+  "author": "hadi chan",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "dependencies": {
+    "esbuild-loader": "^2.13.1",
+    "hard-source-webpack-plugin": "^0.13.1",
+    "node-object-hash": "^2.3.7"
+  },
+  "peerDependencies": {
+    "@vue/cli-service": "^4.0.0-0",
+    "webpack-chain": "^6.4.0"
+  },
+  "devDependencies": {
+    "@types/hard-source-webpack-plugin": "^1.0.3",
+    "@vue/cli-service": "4.5.11",
+    "clean-publish": "2.1.0",
+    "conventional-github-releaser": "3.1.5",
+    "eslint": "7.26.0",
+    "eslint-import-resolver-typescript": "2.4.0",
+    "husky": "4.3.8",
+    "lint-staged": "10.5.4",
+    "standard-version": "9.1.1",
+    "typescript": "4.2.3",
+    "webpack-chain": "6.5.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --fix"
+  }
+}
