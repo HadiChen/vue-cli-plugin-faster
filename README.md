@@ -10,8 +10,8 @@ interface FasterOpts {
   disabled?: boolean;
   // 默认['es2015']
   target?: string | string[];
-  // hard-source-webpack-plugin的配置
-  hardSourceWebpackPluginOption?: any;
+  // hard-source-webpack-plugin的配置，为 false 则不使用 hardSourceWebpackPlugin
+  hardSourceWebpackPluginOption?: any | false;
   // hard-source-webpack-plugin excludeModulePlugin的配置
   excludeModulePluginOption?: any
 }
