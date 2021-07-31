@@ -1,7 +1,12 @@
 module.exports = {
   root: true,
+  env: {
+    node: true
+  },
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.lint.json',
+    ecmaVersion: 2015,
+    sourceType: 'module'
   },
   settings: {
     'import/resolver': {

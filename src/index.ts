@@ -1,39 +1,12 @@
-import * as webpack from 'webpack';
 import { ServicePlugin, ProjectOptions, PluginAPI } from '@vue/cli-service';
 import Config from 'webpack-chain';
 import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import nodeObjectHash from 'node-object-hash';
 import HardSourceWebpackPlugin, { ExcludeModulePlugin } from 'hard-source-webpack-plugin';
+import type { IFasterOpts, WebpackConfiguration, Options } from './types.d';
 
 const esbLoaderPkg = require('esbuild-loader/package.json');
 const tsPkg = require('typescript/package.json');
-
-interface IFasterOpts {
-  disabled?: boolean;
-  target?: string | string[];
-  hardSourceWebpackPluginOption?: Options;
-  excludeModulePluginOption?: HardSourceWebpackPlugin.ExcludeModulePlugin.Option | HardSourceWebpackPlugin.ExcludeModulePlugin.Option[]
-}
-
-type WebpackConfiguration = (webpackConfig?: webpack.Configuration) => string;
-
-interface Options {
-  cacheDirectory?: string | undefined;
-  configHash?: string | WebpackConfiguration;
-  environmentHash?: {
-    root: string;
-    directories: string[];
-    files: string[];
-  };
-  info?: {
-    mode: 'none' | 'test';
-    level: 'debug' | 'log' | 'info' | 'warn' | 'error';
-  };
-  cachePrune?: {
-    maxAge: number;
-    sizeThreshold: number;
-  };
-}
 
 function getOptions (options: ProjectOptions): IFasterOpts {
   const fasterOpts = (options.pluginOptions as any)?.faster || {};
@@ -100,7 +73,16 @@ const fasterPlugin: ServicePlugin = (api, options) => {
   const fasterOpts = getOptions(options);
   const target = fasterOpts.target || ['es2015'];
   const excludeModulePluginOption = fasterOpts.excludeModulePluginOption;
-  const hardSourceWebpackPluginOption = fasterOpts.hardSourceWebpackPluginOption || {};
+  const hardSourceWebpackPluginOption = fasterOpts.hardSourceWebpackPluginOption ?? {
+    configHash(webpackConfig: WebpackConfiguration) {
+      return nodeObjectHash({ sort: false }).hash(webpackConfig);
+    },
+    environmentHash: {
+      root: process.cwd(),
+      directories: [],
+      files: ['package-lock.json', 'yarn.lock'],
+    },
+  } as unknown as Options;
 
   if (fasterOpts.disabled === true) return;
 
@@ -117,23 +99,19 @@ const fasterPlugin: ServicePlugin = (api, options) => {
   })
 
   api.configureWebpack((config) => {
-    config.plugins?.push(
-      new HardSourceWebpackPlugin(Object.assign({
-        configHash(webpackConfig: WebpackConfiguration) {
-          return nodeObjectHash({ sort: false }).hash(webpackConfig);
-        },
-        environmentHash: {
-          root: process.cwd(),
-          directories: [],
-          files: ['package-lock.json', 'yarn.lock'],
-        },
-      }, hardSourceWebpackPluginOption)),
-    );
-
-    if (excludeModulePluginOption) {
+    if (
+      hardSourceWebpackPluginOption !== false
+      && typeof hardSourceWebpackPluginOption === 'object'
+    ) {
       config.plugins?.push(
-        new ExcludeModulePlugin(excludeModulePluginOption),
+        new HardSourceWebpackPlugin(hardSourceWebpackPluginOption),
       );
+  
+      if (excludeModulePluginOption) {
+        config.plugins?.push(
+          new ExcludeModulePlugin(excludeModulePluginOption),
+        );
+      }
     }
   })
 };
